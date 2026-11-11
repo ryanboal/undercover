@@ -3,15 +3,17 @@ import { getJson } from "./api";
 
 export const POLL_MS = 2000;
 
-interface Polled<T> {
+interface Loaded<T> {
   data?: T;
   error?: string;
 }
 
-export function usePolling<T>(
+// Loads JSON from the API, and with poll set, loads it again every POLL_MS.
+export function useJson<T>(
   path: string,
-): Polled<T> & { refresh: () => void } {
-  const [polled, setPolled] = useState<Polled<T>>({});
+  poll: boolean,
+): Loaded<T> & { refresh: () => void } {
+  const [loaded, setLoaded] = useState<Loaded<T>>({});
   const [loads, setLoads] = useState(0);
 
   useEffect(() => {
@@ -19,27 +21,27 @@ export function usePolling<T>(
     const load = () => {
       getJson<T>(path).then(
         (data) => {
-          if (current) setPolled({ data });
+          if (current) setLoaded({ data });
         },
         (error: unknown) => {
           if (current) {
             const message =
               error instanceof Error ? error.message : String(error);
-            setPolled((before) => ({ ...before, error: message }));
+            setLoaded((before) => ({ ...before, error: message }));
           }
         },
       );
     };
     load();
-    const timer = setInterval(load, POLL_MS);
+    const timer = poll ? setInterval(load, POLL_MS) : undefined;
     return () => {
       current = false;
       clearInterval(timer);
     };
-  }, [path, loads]);
+  }, [path, poll, loads]);
 
   const refresh = useCallback(() => {
     setLoads((count) => count + 1);
   }, []);
-  return { ...polled, refresh };
+  return { ...loaded, refresh };
 }

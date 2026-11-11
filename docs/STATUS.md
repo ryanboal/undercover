@@ -1,6 +1,6 @@
 # Status
 
-The pilot is being built from `docs/PLAN.md`. Done so far: Phases 1 to 4.
+The pilot is being built from `docs/PLAN.md`. Done so far: Phases 1 to 5.
 
 ## What's built
 
@@ -16,7 +16,8 @@ The pilot is being built from `docs/PLAN.md`. Done so far: Phases 1 to 4.
   - If the model fails partway through, the claim stays in progress until the next reseed
 - `dashboard/`: React, Vite and TypeScript, in UnderCover's brand with light and dark mode
   - The queue at `/`: a count for each status and every claim with its status, decision and payout, refreshed every two seconds
-  - A claim's page at `/claims/:claimId`, so far with its heading and status
+  - A claim's page at `/claims/:claimId`: the story, items, documents, policy and the customer's earlier claims, with the agent's decision, payout, reason, policy section and payment
+  - While a claim waits for sign-off, a handler picks their name and signs off, which pays it
 - `e2e/`: Playwright tests on their own backend (port 8001, a freshly seeded database in the temp folder) and dashboard (port 5174), so they never touch the dev queue
 
 ## How to run it

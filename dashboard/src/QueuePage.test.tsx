@@ -2,7 +2,7 @@ import { act, cleanup, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ClaimSummary } from "./api";
 import { renderAt, stubApi, summary } from "./testing";
-import { POLL_MS } from "./usePolling";
+import { POLL_MS } from "./useJson";
 
 const queue: ClaimSummary[] = [
   summary,

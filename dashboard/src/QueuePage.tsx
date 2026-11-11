@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import type { ClaimSummary, Status } from "./api";
 import { DecisionBadge, StatusBadge } from "./Badge";
 import { date, money, statusLabels, words } from "./format";
-import { usePolling } from "./usePolling";
+import { useJson } from "./useJson";
 
 const STATUSES: Status[] = [
   "waiting",
@@ -12,7 +12,7 @@ const STATUSES: Status[] = [
 ];
 
 export function QueuePage() {
-  const { data: claims, error } = usePolling<ClaimSummary[]>("/api/claims");
+  const { data: claims, error } = useJson<ClaimSummary[]>("/api/claims", true);
 
   return (
     <>

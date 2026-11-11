@@ -80,3 +80,51 @@ async function answer<T>(response: Response): Promise<T> {
   }
   return (await response.json()) as T;
 }
+
+export interface Trip {
+  destination: string;
+  departs_on: string;
+  returns_on: string;
+  trip_cost: number;
+}
+
+export interface Policy {
+  policy_id: string;
+  customer_id: string;
+  plan: string;
+  add_ons: string[];
+  purchased_on: string;
+  sold_through: string;
+  trip: Trip;
+  travelers: string[];
+  status: string;
+}
+
+export interface PreviousClaim {
+  claim_id: string;
+  filed_on: string;
+  incident_date: string;
+  claim_type: string;
+  summary: string;
+  outcome: string;
+  amount_paid: number;
+}
+
+export interface Customer {
+  customer_id: string;
+  name: string;
+  email: string;
+  phone: string;
+  date_of_birth: string;
+  address: { street: string; city: string; state: string; zip: string };
+  customer_since: string;
+  previous_claims: PreviousClaim[];
+}
+
+export interface Handler {
+  handler_id: string;
+  name: string;
+  role: string;
+  email: string;
+  can_approve_over_limit: boolean;
+}

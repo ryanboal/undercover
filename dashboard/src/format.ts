@@ -13,6 +13,8 @@ const moment = new Intl.DateTimeFormat("en-US", {
   timeStyle: "short",
 });
 
+export const AGENT = "UnderCover Agent";
+
 export const statusLabels: Record<Status, string> = {
   waiting: "Waiting",
   in_progress: "In progress",

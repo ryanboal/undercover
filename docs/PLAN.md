@@ -177,10 +177,10 @@ If the model fails partway through, the run stops and the claim stays In progres
 
 **Success criteria**
 
-- [ ] vitest: the page in each state: Waiting with no decision yet, approved and paid, declined, referred, and Waiting for sign-off with the panel; signing off sends the chosen handler and the page updates
-- [ ] e2e: on CLM-1003, acting as the agent through the API: start, approve with payout 1,150.00, and try to pay (refused with 403). The claim page shows Waiting for sign-off. Choose Dana Whitfield and sign off, and the page shows paid $1,150.00, signed off by Dana Whitfield. The queue shows CLM-1003 as Decided.
-- [ ] In the browser: CLM-1001, from the Phase 3 live run, shows the agent's decision, payout, reason and policy section
-- [ ] `npm run check` passes
+- [x] vitest: the page in each state: Waiting with no decision yet, approved and paid, declined, referred, and Waiting for sign-off with the panel; signing off sends the chosen handler and the page updates
+- [x] e2e: on CLM-1003, acting as the agent through the API: start, approve with payout 1,150.00, and try to pay (refused with 403). The claim page shows Waiting for sign-off. Choose Dana Whitfield and sign off, and the page shows paid $1,150.00, signed off by Dana Whitfield. The queue shows CLM-1003 as Decided.
+- [x] In the browser: CLM-1001, from the Phase 3 live run, shows the agent's decision, payout, reason and policy section
+- [x] `npm run check` passes
 
 ## Phase 6: Watching the agent work, and its instructions
 
