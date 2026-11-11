@@ -1,19 +1,28 @@
-import { useEffect, useState } from "react";
+import { Link, NavLink, Route, Routes } from "react-router";
+import { ClaimPage } from "./ClaimPage";
+import { QueuePage } from "./QueuePage";
 
 export function App() {
-  const [status, setStatus] = useState("checking");
-
-  useEffect(() => {
-    void fetch("/api/health")
-      .then((response) => (response.ok ? "up" : "down"))
-      .catch(() => "down")
-      .then(setStatus);
-  }, []);
-
   return (
-    <main>
-      <h1>UnderCover</h1>
-      <p>Backend: {status}</p>
-    </main>
+    <>
+      <header className="header">
+        <Link to="/" className="brand">
+          UnderCover
+        </Link>
+        <span className="tagline">Claims desk</span>
+        <nav className="nav">
+          <NavLink to="/" end>
+            Queue
+          </NavLink>
+        </nav>
+      </header>
+      <main>
+        <Routes>
+          <Route path="/" element={<QueuePage />} />
+          <Route path="/claims/:claimId" element={<ClaimPage />} />
+          <Route path="*" element={<p>There is no page here.</p>} />
+        </Routes>
+      </main>
+    </>
   );
 }

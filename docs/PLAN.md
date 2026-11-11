@@ -158,14 +158,14 @@ If the model fails partway through, the run stops and the claim stays In progres
 
 **Success criteria**
 
-- [ ] vitest: the queue renders claims from a stubbed API with the right status labels and money formats, the counts are right, and a poll picks up a change
-- [ ] e2e: the queue shows 25 claims, and clicking CLM-1001 opens its page
-- [ ] In the browser with the Playwright MCP server, at `localhost:5173`:
-  - [ ] the queue shows 25 claims, with each status's count, in Instrument Sans with money in JetBrains Mono
-  - [ ] the page background is `#F0F4F5` in light mode and `#04232E` in dark mode, with white and black panels
-  - [ ] after `start_claim` on CLM-1002 with curl, its row shows In progress within three seconds, without a reload
-- [ ] `npm run e2e` passes while `npm run dev` is running, and afterwards the dev queue is exactly as it was
-- [ ] `npm run check:ts` passes with coverage at 80% or more
+- [x] vitest: the queue renders claims from a stubbed API with the right status labels and money formats, the counts are right, and a poll picks up a change
+- [x] e2e: the queue shows 25 claims, and clicking CLM-1001 opens its page
+- [x] In the browser with the Playwright MCP server, at `localhost:5173`:
+  - [x] the queue shows 25 claims, with each status's count, in Instrument Sans with money in JetBrains Mono
+  - [x] the page background is `#F0F4F5` in light mode and `#04232E` in dark mode, with white and black panels
+  - [x] after `start_claim` on CLM-1002 with curl, its row shows In progress within three seconds, without a reload
+- [x] `npm run e2e` passes while `npm run dev` is running, and afterwards the dev queue is exactly as it was
+- [x] `npm run check:ts` passes with coverage at 80% or more
 
 ## Phase 5: The claim page and sign-off
 

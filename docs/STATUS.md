@@ -1,6 +1,6 @@
 # Status
 
-The pilot is being built from `docs/PLAN.md`. Done so far: Phases 1 to 3.
+The pilot is being built from `docs/PLAN.md`. Done so far: Phases 1 to 4.
 
 ## What's built
 
@@ -14,8 +14,10 @@ The pilot is being built from `docs/PLAN.md`. Done so far: Phases 1 to 3.
   - `run(claim_id, thread_id)` starts the claim, takes its system prompt from `GET /api/instructions`, and posts every step to the backend as it works
   - Its tools, in `agent/tools.py`, call the API: `get_claim`, `get_policy`, `get_claim_history`, `decide_claim` and `pay_claim`. A refusal from the backend goes back to the model as text.
   - If the model fails partway through, the claim stays in progress until the next reseed
-- `dashboard/`: still the skeleton's health page
-- `e2e/`: one test of that page
+- `dashboard/`: React, Vite and TypeScript, in UnderCover's brand with light and dark mode
+  - The queue at `/`: a count for each status and every claim with its status, decision and payout, refreshed every two seconds
+  - A claim's page at `/claims/:claimId`, so far with its heading and status
+- `e2e/`: Playwright tests on their own backend (port 8001, a freshly seeded database in the temp folder) and dashboard (port 5174), so they never touch the dev queue
 
 ## How to run it
 
