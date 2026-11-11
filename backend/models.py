@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 Status = Literal["waiting", "in_progress", "waiting_for_sign_off", "decided"]
 DecisionKind = Literal["approve", "decline", "refer"]
@@ -118,3 +118,33 @@ class Handler(BaseModel):
     role: str
     email: str
     can_approve_over_limit: bool
+
+
+StepKind = Literal["message", "tool_call", "tool_result"]
+
+
+class Step(BaseModel):
+    step_id: int
+    at: str
+    kind: StepKind
+    text: str
+
+
+class NewStep(BaseModel):
+    kind: StepKind
+    text: str
+
+
+class NewDecision(BaseModel):
+    decision: DecisionKind
+    payout: float = Field(ge=0)
+    reason: str
+    policy_section: str
+
+
+class NewPayment(BaseModel):
+    amount: float = Field(gt=0)
+
+
+class SignOff(BaseModel):
+    handler_id: str

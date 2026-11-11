@@ -109,17 +109,17 @@ Every operation has an `operation_id`, a one-line docstring and only required in
 
 **Success criteria**
 
-- [ ] pytest covers every move in the table above and every refusal
-- [ ] On a fresh seed, these API calls (made with curl) give these results:
-  - [ ] `start_claim` on CLM-1001 makes it `in_progress`; a second `start_claim` returns 409
-  - [ ] `decide_claim` approve with payout 420.00 keeps it `in_progress` with the decision recorded; `pay_claim` 420.00 makes it `decided`, paid by the UnderCover Agent
-  - [ ] On CLM-1003, `decide_claim` approve with payout 1,150.00 makes it `waiting_for_sign_off`
-  - [ ] `pay_claim` 1,150.00 on CLM-1003 returns 403, saying it needs a handler's sign-off; `pay_claim` 900.00 is refused because it doesn't match the payout; the claim stays unpaid
-  - [ ] `sign_off_claim` with HND-01 makes CLM-1003 `decided`, paid 1,150.00 by Dana Whitfield; signing off again returns 409
-  - [ ] `decide_claim` decline on CLM-1004 makes it `decided` with no payment; `pay_claim` on it is refused; `decide_claim` again returns 409
-  - [ ] Two `add_step` calls on CLM-1001 come back in order from `list_steps`
-- [ ] `uv run -m backend.seed` puts all 25 claims back to `waiting` with no decisions, payments or steps
-- [ ] `npm run check:python` passes with coverage at 80% or more
+- [x] pytest covers every move in the table above and every refusal
+- [x] On a fresh seed, these API calls (made with curl) give these results:
+  - [x] `start_claim` on CLM-1001 makes it `in_progress`; a second `start_claim` returns 409
+  - [x] `decide_claim` approve with payout 420.00 keeps it `in_progress` with the decision recorded; `pay_claim` 420.00 makes it `decided`, paid by the UnderCover Agent
+  - [x] On CLM-1003, `decide_claim` approve with payout 1,150.00 makes it `waiting_for_sign_off`
+  - [x] `pay_claim` 1,150.00 on CLM-1003 returns 403, saying it needs a handler's sign-off; `pay_claim` 900.00 is refused because it doesn't match the payout; the claim stays unpaid
+  - [x] `sign_off_claim` with HND-01 makes CLM-1003 `decided`, paid 1,150.00 by Dana Whitfield; signing off again returns 409
+  - [x] `decide_claim` decline on CLM-1004 makes it `decided` with no payment; `pay_claim` on it is refused; `decide_claim` again returns 409
+  - [x] Two `add_step` calls on CLM-1001 come back in order from `list_steps`
+- [x] `uv run -m backend.seed` puts all 25 claims back to `waiting` with no decisions, payments or steps
+- [x] `npm run check:python` passes with coverage at 80% or more
 
 ## Phase 3: The UnderCover Agent
 
