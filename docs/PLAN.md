@@ -134,16 +134,16 @@ If the model fails partway through, the run stops and the claim stays In progres
 
 **Success criteria**
 
-- [ ] Tests with a stub model, with no real model calls:
-  - [ ] An approval under $1,000 ends Decided and paid by the agent, with the steps recorded in order: tool calls, their results and the final message
-  - [ ] An approval over $1,000 where the agent then tries to pay ends Waiting for sign-off with no payment, and the refusal appears in the steps
-  - [ ] A decline ends Decided with no payment
-  - [ ] The system prompt is the text from `GET /api/instructions`
-  - [ ] `uv run -m agent` works only the waiting claims, and `uv run -m agent CLM-1001` works just that one
-- [ ] `GET /api/instructions` returns the instructions followed by the full policy wording
-- [ ] `grep -rn "data/" agent` finds nothing: the agent reads no files
-- [ ] A live run: with `npm run dev` up, `uv run -m agent CLM-1001` uses the real model (a few cents at most). It ends with CLM-1001 Decided or Waiting for sign-off, with a decision, a payout, a reason of two or three sentences and a policy section, and its steps appear in `GET /api/claims/CLM-1001/steps`.
-- [ ] `npm run check:python` passes with coverage at 80% or more
+- [x] Tests with a stub model, with no real model calls:
+  - [x] An approval under $1,000 ends Decided and paid by the agent, with the steps recorded in order: tool calls, their results and the final message
+  - [x] An approval over $1,000 where the agent then tries to pay ends Waiting for sign-off with no payment, and the refusal appears in the steps
+  - [x] A decline ends Decided with no payment
+  - [x] The system prompt is the text from `GET /api/instructions`
+  - [x] `uv run -m agent` works only the waiting claims, and `uv run -m agent CLM-1001` works just that one
+- [x] `GET /api/instructions` returns the instructions followed by the full policy wording
+- [x] `grep -rn "data/" agent` finds nothing: the agent reads no files
+- [x] A live run: with `npm run dev` up, `uv run -m agent CLM-1001` uses the real model (a few cents at most). It ends with CLM-1001 Decided or Waiting for sign-off, with a decision, a payout, a reason of two or three sentences and a policy section, and its steps appear in `GET /api/claims/CLM-1001/steps`.
+- [x] `npm run check:python` passes with coverage at 80% or more
 
 ## Phase 4: The dashboard and the queue
 

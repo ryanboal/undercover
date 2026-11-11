@@ -148,3 +148,7 @@ class NewPayment(BaseModel):
 
 class SignOff(BaseModel):
     handler_id: str
+
+
+class Instructions(BaseModel):
+    instructions: str

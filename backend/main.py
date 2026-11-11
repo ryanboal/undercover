@@ -5,6 +5,7 @@ import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, status
 
@@ -15,6 +16,7 @@ from backend.models import (
     Customer,
     Decision,
     Handler,
+    Instructions,
     NewDecision,
     NewPayment,
     NewStep,
@@ -29,6 +31,8 @@ from backend.seed import DATA, seed
 COMPANY = json.loads((DATA / "company.json").read_text(encoding="utf-8"))
 APPROVAL_LIMIT: float = COMPANY["payout_approval_limit"]
 AGENT_NAME = "UnderCover Agent"
+INSTRUCTIONS = Path(__file__).parent / "agent_instructions.md"
+POLICY_WORDING = DATA / "policy_wording.md"
 
 
 @asynccontextmanager
@@ -147,6 +151,16 @@ def get_customer(customer_id: str) -> Customer:
 def get_claim_history(customer_id: str) -> list[PreviousClaim]:
     """Get one customer's earlier claims, without their personal details."""
     return customer_record(customer_id).previous_claims
+
+
+@app.get("/api/instructions", operation_id="get_instructions")
+def get_instructions() -> Instructions:
+    """Get the agent's instructions, followed by the policy wording it decides by."""
+    return Instructions(
+        instructions=INSTRUCTIONS.read_text(encoding="utf-8")
+        + "\n"
+        + POLICY_WORDING.read_text(encoding="utf-8")
+    )
 
 
 @app.get("/api/handlers", operation_id="list_handlers")
