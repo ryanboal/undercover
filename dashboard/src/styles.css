@@ -377,3 +377,81 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.step p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.step time {
+  font-size: 12px;
+}
+
+.step-message p {
+  font-weight: 600;
+}
+
+.step summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.step pre {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--sunken);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.refused {
+  color: var(--raspberry-ink);
+  font-weight: 600;
+}
+
+.markdown {
+  max-width: 860px;
+}
+
+.markdown h1 {
+  font-size: 24px;
+  margin: 28px 0 8px;
+}
+
+.markdown h1:first-child {
+  margin-top: 0;
+}
+
+.markdown h2 {
+  margin: 20px 0 6px;
+}
+
+.markdown code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.markdown th,
+.markdown td {
+  border-top: 1px solid var(--rule);
+}

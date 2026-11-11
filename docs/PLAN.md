@@ -192,11 +192,11 @@ If the model fails partway through, the run stops and the claim stays In progres
 
 **Success criteria**
 
-- [ ] vitest: the steps render each kind and fold the results away; new steps appear after a poll; the Instructions page renders headings and tables and has no inputs
-- [ ] e2e: steps added through the API appear on an open claim page without a reload; the Instructions page shows the instructions and the policy wording's section headings, with nothing to edit
-- [ ] A live run in the browser: with the claim page for CLM-1003 open, `uv run -m agent CLM-1003` (a few cents at most) shows its steps arriving one at a time, and the claim ends Decided or Waiting for sign-off
-- [ ] `npm run check` passes: ruff, pyright, pytest, ESLint, Prettier, tsc, vitest and Playwright
-- [ ] `uv run -m backend.seed` resets the queue, so the pilot starts with 25 waiting claims
+- [x] vitest: the steps render each kind and fold the results away; new steps appear after a poll; the Instructions page renders headings and tables and has no inputs
+- [x] e2e: steps added through the API appear on an open claim page without a reload; the Instructions page shows the instructions and the policy wording's section headings, with nothing to edit
+- [x] A live run in the browser: with the claim page for CLM-1003 open, `uv run -m agent CLM-1003` (a few cents at most) shows its steps arriving one at a time, and the claim ends Decided or Waiting for sign-off
+- [x] `npm run check` passes: ruff, pyright, pytest, ESLint, Prettier, tsc, vitest and Playwright
+- [x] `uv run -m backend.seed` resets the queue, so the pilot starts with 25 waiting claims
 
 ## Left out of the pilot
 

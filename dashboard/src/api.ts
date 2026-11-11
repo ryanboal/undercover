@@ -128,3 +128,10 @@ export interface Handler {
   email: string;
   can_approve_over_limit: boolean;
 }
+
+export interface Step {
+  step_id: number;
+  at: string;
+  kind: "message" | "tool_call" | "tool_result";
+  text: string;
+}

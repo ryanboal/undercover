@@ -13,6 +13,8 @@ const moment = new Intl.DateTimeFormat("en-US", {
   timeStyle: "short",
 });
 
+const time = new Intl.DateTimeFormat("en-US", { timeStyle: "medium" });
+
 export const AGENT = "UnderCover Agent";
 
 export const statusLabels: Record<Status, string> = {
@@ -38,6 +40,10 @@ export function date(isoDate: string): string {
 
 export function dateTime(isoTimestamp: string): string {
   return moment.format(new Date(isoTimestamp));
+}
+
+export function clock(isoTimestamp: string): string {
+  return time.format(new Date(isoTimestamp));
 }
 
 export function words(identifier: string): string {

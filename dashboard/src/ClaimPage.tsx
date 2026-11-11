@@ -4,6 +4,7 @@ import { StatusBadge } from "./Badge";
 import { CustomerPanel, DecisionPanel, PolicyPanel } from "./ClaimPanels";
 import { date, money, words } from "./format";
 import { SignOff } from "./SignOff";
+import { Steps } from "./Steps";
 import { useJson } from "./useJson";
 
 export function ClaimPage() {
@@ -41,6 +42,7 @@ export function ClaimPage() {
           {claim.status === "waiting_for_sign_off" && (
             <SignOff claim={claim} onSignedOff={refresh} />
           )}
+          <Steps claimId={claim.claim_id} />
           <PolicyPanel policyId={claim.policy_id} />
           <CustomerPanel customerId={claim.customer_id} />
         </div>
