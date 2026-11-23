@@ -1,6 +1,6 @@
 # Status
 
-The claims pilot in `docs/PLAN.md` is built: all six phases are done. The harness in `docs/PLAN_HARNESS.md` is being built: phases 1 to 5 are done.
+The claims pilot in `docs/PLAN.md` and the agent's harness in `docs/PLAN_HARNESS.md` are built: all six phases of each are done.
 
 ## Running it
 
@@ -18,4 +18,4 @@ The claims pilot in `docs/PLAN.md` is built: all six phases are done. The harnes
 
 ## Last live run
 
-On September 27, 2026, `uv run -m agent` with `openai/gpt-6-luna` worked all 25 claims in 2 minutes 47 seconds: 17 approve, 5 decline and 3 refer. Three approvals were over $1,000 and waited for sign-off (CLM-1003, CLM-1008 and CLM-1011), and every other approval was paid its payout. These decisions have not yet been scored against the handlers' decisions in `data/evals/`.
+On November 22, 2026, after reseeding, `uv run -m agent --cap 5` with `deepseek/deepseek-v4.1-flash` worked five claims in about a minute and a half, oldest submitted first: CLM-1001 approve $420.00 (paid), CLM-1008 approve $2,240.00 and CLM-1011 approve $1,150.00 (both waiting for sign-off), CLM-1010 decline and CLM-1018 refer (proof of value missing for the jacket). The to-do list filled in and was ticked off on the dashboard, no claim failed, and the other 20 claims stayed waiting. Each claim agent read between seven and nine sections of the wording and the manual, and one (CLM-1010) also searched them. Three of the five reasons ran to four or five sentences rather than two or three. These decisions have not been scored against the handlers' decisions in `data/evals/`.

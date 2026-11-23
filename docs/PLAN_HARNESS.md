@@ -205,13 +205,13 @@ Add the to-do list panel, the Needs a handler state, the `read` and `error` step
 
 Run the agent live as the brief's "what done looks like" describes, and bring the documents up to date.
 
-- [ ] Live, in the browser: reseed, open `/`, and run `uv run -m agent --cap 5`. Snapshots taken during the run show the to-do list appearing and items being ticked off; the page ends with five claims worked, the summary, and 20 claims Waiting
-- [ ] Live, in the browser: a claim from the run shows its steps, including "Read" lines for the sections it looked up, and its decision with a section and a reason of two or three sentences
-- [ ] Live: every approval over $1,000 in the run is `waiting_for_sign_off` with no payment, and every other approval is paid exactly its payout
-- [ ] `docs/SPEC.md` describes the manual, the run with its cap, the to-do list and the Needs a handler state
-- [ ] `docs/TECH_STACK.md` names DeepSeek V4.1 Flash as the default model and describes the queue agent, the claim agent and the middleware
-- [ ] `docs/STATUS.md` describes what's built, how to run the agent (whole queue, capped, one claim), and the results of the live run
-- [ ] `npm run check` passes
+- [x] Live, in the browser: reseed, open `/`, and run `uv run -m agent --cap 5`. Snapshots taken during the run show the to-do list appearing and items being ticked off; the page ends with five claims worked, the summary, and 20 claims Waiting
+- [x] Live, in the browser: a claim from the run shows its steps, including "Read" lines for the sections it looked up, and its decision with a section and a reason of two or three sentences
+- [x] Live: every approval over $1,000 in the run is `waiting_for_sign_off` with no payment, and every other approval is paid exactly its payout
+- [x] `docs/SPEC.md` describes the manual, the run with its cap, the to-do list and the Needs a handler state
+- [x] `docs/TECH_STACK.md` names DeepSeek V4.1 Flash as the default model and describes the queue agent, the claim agent and the middleware
+- [x] `docs/STATUS.md` describes what's built, how to run the agent (whole queue, capped, one claim), and the results of the live run
+- [x] `npm run check` passes
 
 ## Not in this plan
 

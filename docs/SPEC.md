@@ -18,12 +18,21 @@ We want an AI agent, the UnderCover Agent, to work the queue the way a handler d
 
 Our goal is to handle claims straight through, as accurately as our handlers do.
 
+## Running the queue
+
+- One run works the whole queue. We start the agent once, and it works every waiting claim in an order it chooses, then finishes with a short summary for the handlers.
+- A run can be capped at a number of claims, leaving the rest waiting, so a trial costs little. The agent can also be run on one named claim.
+- The agent plans the run as a to-do list and keeps it up to date, with each item to do, in progress, done or left for a handler.
+- Each claim is handed to a fresh helper that works that one claim from a clean start and reports back in a line. Every step on a claim is recorded on that claim.
+- Problems are put right automatically. One bad claim never stops the run or leaves a claim stuck in progress. A claim that fails before it is decided goes back in the queue to be tried again, and a claim that fails twice is left for a handler. No claim is ever decided or paid twice. Before it finishes, the agent checks that it has not missed a waiting claim within its cap.
+
 ## What the team needs to see
 
-- The queue, with where each claim stands: waiting, in progress, waiting for sign-off or decided.
+- The queue, with where each claim stands: waiting, in progress, waiting for sign-off, decided or needs a handler.
+- The agent's to-do list for the current run, as it fills in and is ticked off, and the run's summary.
 - Each claim in full, with the agent's decision and its reasons.
-- What the agent is doing on a claim while it works, step by step.
-- The agent's instructions, read only.
+- What the agent is doing on a claim while it works, step by step, including the sections of the wording and the manual it read.
+- The agent's instructions for running the queue and for working a claim, read only. They are written from the policy wording and the manual, never from our handlers' decisions.
 
 ## Rules
 
