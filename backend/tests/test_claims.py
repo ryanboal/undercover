@@ -21,6 +21,7 @@ def test_list_claims(client):
         "status": "waiting",
         "decision": None,
         "payout": None,
+        "failed_attempts": 0,
     }
 
 

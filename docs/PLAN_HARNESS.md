@@ -47,7 +47,7 @@ The backend gains a fifth claim state and a count of failed attempts:
 1. Refuses, as text to the model, if the claim isn't one the run may work: the run has already attempted as many claims as its cap and this claim isn't one of them.
 2. Starts the claim with a new thread id. If the backend refuses (it isn't waiting), it returns that, so a claim can never be started twice.
 3. Runs the claim agent, recording its steps.
-4. If anything raises, or the claim agent ends without recording a decision, it records an `error` step and calls the new `release_claim` operation. The backend moves the claim back to `waiting` on the first failure and to `needs_handler` on the second.
+4. If anything raises, or the claim agent ends without recording a decision, it calls the new `release_claim` operation with what went wrong. The backend records that as an `error` step on the claim and moves the claim back to `waiting` on the first failure and to `needs_handler` on the second.
 5. Returns the one-line outcome.
 
 A failed claim is back in the queue, so the queue agent can try it again later in the run; its to-do item goes back to "to do". `finish_run` is the check for missed claims: it refuses, with the list of claim ids, while a waiting claim remains that the run could still work, meaning the run is under its cap or the claim was tried once and is waiting for its retry. The queue agent then carries on. If the queue agent stops without finishing the run, the harness tells it to carry on, up to two times, and then finishes the run itself with a note that it stopped early.
@@ -140,17 +140,17 @@ Split both documents into sections at seed time, add `search_documents` and `rea
 
 Add the `runs` table and its four operations, `release_claim`, the `needs_handler` state, the attempt count, and the `read` and `error` step kinds.
 
-- [ ] pytest covers every new rule, including each 404, 409 and 422
-- [ ] `start_run` with cap 5 returns a run with an id, the cap, a start time, an empty to-do list and no summary; a cap of 0 returns 422
-- [ ] `get_current_run` returns `null` on a fresh database, then the latest run once one has started
-- [ ] `record_todos` with three items, then `get_current_run`, returns the three items in order; a status of `maybe` returns 422
-- [ ] `finish_run` stores the summary and the finish time; a second call returns 409
-- [ ] Walked through with curl: start `CLM-1001`, release it with a reason, and it is `waiting` again with 1 failed attempt; start and release it again, and it is `needs_handler`; `start_claim` on it then returns 409
-- [ ] `release_claim` on a waiting claim returns 409, and on a claim with a decision returns 409
-- [ ] `list_claims` and `get_claim` include the failed attempt count
-- [ ] `record_step` accepts the kinds `read` and `error`
-- [ ] The OpenAPI test passes with the new operations
-- [ ] `npm run check` passes
+- [x] pytest covers every new rule, including each 404, 409 and 422
+- [x] `start_run` with cap 5 returns a run with an id, the cap, a start time, an empty to-do list and no summary; a cap of 0 returns 422
+- [x] `get_current_run` returns `null` on a fresh database, then the latest run once one has started
+- [x] `record_todos` with three items, then `get_current_run`, returns the three items in order; a status of `maybe` returns 422
+- [x] `finish_run` stores the summary and the finish time; a second call returns 409
+- [x] Walked through with curl: start `CLM-1001`, release it with a reason, and it is `waiting` again with 1 failed attempt; start and release it again, and it is `needs_handler`; `start_claim` on it then returns 409
+- [x] `release_claim` on a waiting claim returns 409, and on a claim with a decision returns 409
+- [x] `list_claims` and `get_claim` include the failed attempt count
+- [x] `record_step` accepts the kinds `read` and `error`
+- [x] The OpenAPI test passes with the new operations
+- [x] `npm run check` passes
 
 ## Phase 3: The claim agent
 
