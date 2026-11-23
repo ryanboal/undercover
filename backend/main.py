@@ -37,7 +37,8 @@ from backend.models import (
     TodosRequest,
 )
 
-INSTRUCTIONS = Path(__file__).parent / "instructions.md"
+INSTRUCTIONS = Path(__file__).parent / "instructions"
+DOCUMENT_NAMES = {"wording": "the policy wording", "manual": "the claims manual"}
 MAX_ATTEMPTS = 2
 
 
@@ -200,11 +201,26 @@ def get_claim_history(customer_id: str, db: Database) -> list[PreviousClaim]:
     ]
 
 
+def contents(db: sqlite3.Connection) -> str:
+    """List the sections of the wording and the manual, by number and title."""
+    parts = []
+    for document, name in DOCUMENT_NAMES.items():
+        rows = db.execute(
+            "SELECT number, title FROM sections WHERE document = ?", (document,)
+        ).fetchall()
+        lines = "\n".join(f"- {row['number']}. {row['title']}" for row in rows)
+        parts.append(f"## Contents of {name}, document `{document}`\n\n{lines}\n")
+    return "\n".join(parts)
+
+
 @app.get("/api/instructions", operation_id="get_instructions")
 def get_instructions(db: Database) -> Instructions:
-    """Get the agent's instructions, followed by the policy wording."""
-    wording = db.execute("SELECT policy_wording FROM settings").fetchone()[0]
-    return Instructions(text=f"{INSTRUCTIONS.read_text(encoding='utf-8')}\n{wording}")
+    """Get the instructions for running the queue and for working a claim."""
+    claim = (INSTRUCTIONS / "claim.md").read_text(encoding="utf-8")
+    return Instructions(
+        queue=(INSTRUCTIONS / "queue.md").read_text(encoding="utf-8"),
+        claim=f"{claim}\n{contents(db)}",
+    )
 
 
 @app.get("/api/documents/search", operation_id="search_documents")

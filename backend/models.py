@@ -145,7 +145,8 @@ class Run(BaseModel):
 
 
 class Instructions(BaseModel):
-    text: str
+    queue: str
+    claim: str
 
 
 class StartRequest(BaseModel):

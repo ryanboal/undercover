@@ -156,19 +156,19 @@ Add the `runs` table and its four operations, `release_claim`, the `needs_handle
 
 Turn the pilot's agent into the claim agent: the new instructions, the two look-up tools, the middleware, the default model, and `work_claim` with its failure handling. `uv run -m agent CLM-1001` uses it.
 
-- [ ] `curl -s localhost:8000/api/instructions` returns `queue` and `claim`; `claim` ends with the contents of both documents and does not contain the full text of any section (for example, no "Worked example 1")
-- [ ] pytest: the claim agent's tools are exactly `get_claim`, `get_policy`, `get_claim_history`, `search_documents`, `read_section`, `record_decision` and `pay_claim`, each named after a backend operation
-- [ ] pytest: with `MODEL_NAME` unset the model is `deepseek/deepseek-v4.1-flash` with low reasoning effort; with `MODEL_NAME` set it is that model
-- [ ] Stub model test: the stub searches, reads manual section 9, decides and pays. The claim is `decided` and paid, and its steps include a `read` step named "Claims manual, section 9: Repeat claims". `work_claim` returns `CLM-1001 approve $420.00, paid`
-- [ ] Stub model test: an approval over the limit returns a line that says "held for sign-off", and the claim has no payment
-- [ ] Stub model test, a failed claim: the stub raises partway. `work_claim` returns a line ending "back in the queue", the claim is `waiting` with 1 failed attempt, and an `error` step is recorded
-- [ ] Stub model test, fails twice: the claim fails again on its second attempt and is `needs_handler`, and the line says "left for a handler"
-- [ ] Stub model test: a stub that ends without recording a decision counts as a failure in the same way
-- [ ] Stub model test: a provider error on the first call is retried by the middleware and the claim is then decided normally
-- [ ] Stub model test: a stub that loops past the model call limit fails the attempt, and the claim goes back in the queue
-- [ ] Stub model test: `work_claim` on a decided claim returns the backend's refusal, and the claim's decision and payment are unchanged
-- [ ] Live: on a reseeded database, `uv run -m agent CLM-1001` prints a one-line outcome, and the claim's steps include at least one `search_documents` or `read_section` call and a `read` step
-- [ ] `npm run check` passes
+- [x] `curl -s localhost:8000/api/instructions` returns `queue` and `claim`; `claim` ends with the contents of both documents and does not contain the full text of any section (for example, no "Worked example 1")
+- [x] pytest: the claim agent's tools are exactly `get_claim`, `get_policy`, `get_claim_history`, `search_documents`, `read_section`, `record_decision` and `pay_claim`, each named after a backend operation
+- [x] pytest: with `MODEL_NAME` unset the model is `deepseek/deepseek-v4.1-flash` with low reasoning effort; with `MODEL_NAME` set it is that model
+- [x] Stub model test: the stub searches, reads manual section 9, decides and pays. The claim is `decided` and paid, and its steps include a `read` step named "Claims manual, section 9: Repeat claims". `work_claim` returns `CLM-1001 approve $420.00, paid`
+- [x] Stub model test: an approval over the limit returns a line that says "held for sign-off", and the claim has no payment
+- [x] Stub model test, a failed claim: the stub raises partway. `work_claim` returns a line ending "back in the queue", the claim is `waiting` with 1 failed attempt, and an `error` step is recorded
+- [x] Stub model test, fails twice: the claim fails again on its second attempt and is `needs_handler`, and the line says "left for a handler"
+- [x] Stub model test: a stub that ends without recording a decision counts as a failure in the same way
+- [x] Stub model test: a provider error on the first call is retried by the middleware and the claim is then decided normally
+- [x] Stub model test: a stub that loops past the model call limit fails the attempt, and the claim goes back in the queue
+- [x] Stub model test: `work_claim` on a decided claim returns the backend's refusal, and the claim's decision and payment are unchanged
+- [x] Live: on a reseeded database, `uv run -m agent CLM-1001` prints a one-line outcome, and the claim's steps include at least one `search_documents` or `read_section` call and a `read` step
+- [x] `npm run check` passes
 
 ## Phase 4: The queue agent
 

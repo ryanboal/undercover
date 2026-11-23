@@ -103,6 +103,11 @@ export interface Step {
   created_at: string;
 }
 
+export interface Instructions {
+  queue: string;
+  claim: string;
+}
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -145,7 +150,7 @@ export const api = {
     request<PreviousClaim[]>(
       `/api/customers/${encodeURIComponent(customerId)}/claims`,
     ),
-  getInstructions: () => request<{ text: string }>("/api/instructions"),
+  getInstructions: () => request<Instructions>("/api/instructions"),
   listHandlers: () => request<Handler[]>("/api/handlers"),
   signOff: (claimId: string, handlerId: string) =>
     post<Claim>(`${claimPath(claimId)}/sign-off`, { handler_id: handlerId }),

@@ -1,6 +1,7 @@
 """The agent's tools, each named after the backend operation it calls."""
 
 from typing import Any, Literal
+from urllib.parse import urlencode
 
 import httpx
 from langchain_core.tools import tool
@@ -47,6 +48,25 @@ def get_claim_history(customer_id: str) -> str:
 
 
 @tool
+def search_documents(query: str) -> str:
+    """Search the policy wording and the claims manual for the five best sections."""
+    return reply(request("GET", f"/api/documents/search?{urlencode({'query': query})}"))
+
+
+@tool
+def read_section(document: Literal["wording", "manual"], number: str) -> str:
+    """Read one section of the policy wording or the claims manual in full."""
+    response = request("GET", f"/api/documents/{document}/sections/{number}")
+    if response.is_error:
+        return reply(response)
+    section = response.json()
+    name = "Policy wording" if document == "wording" else "Claims manual"
+    return (
+        f"{name}, section {section['number']}: {section['title']}\n\n{section['text']}"
+    )
+
+
+@tool
 def record_decision(
     claim_id: str,
     decision: Literal["approve", "decline", "refer"],
@@ -70,4 +90,12 @@ def pay_claim(claim_id: str, amount: float) -> str:
     return reply(request("POST", f"/api/claims/{claim_id}/payment", {"amount": amount}))
 
 
-TOOLS = [get_claim, get_policy, get_claim_history, record_decision, pay_claim]
+CLAIM_TOOLS = [
+    get_claim,
+    get_policy,
+    get_claim_history,
+    search_documents,
+    read_section,
+    record_decision,
+    pay_claim,
+]
