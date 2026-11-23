@@ -174,17 +174,17 @@ Turn the pilot's agent into the claim agent: the new instructions, the two look-
 
 Build the queue agent with `list_claims`, `record_todos`, `work_claim` and `finish_run`, the cap, the missed-claims check, the release of claims left in progress, and `uv run -m agent [--cap N]`.
 
-- [ ] pytest: the queue agent's tools are exactly `list_claims`, `record_todos`, `work_claim` and `finish_run`
-- [ ] Stub model test, a whole run: the queue stub lists the claims, records a to-do list, works three claims (each with its own claim stub), ticks each off and finishes. The run is stored with its to-do list all `done` and the summary, and each claim has its own steps and thread id
-- [ ] Stub model test, the cap: with cap 2, a third `work_claim` is refused with a message about the cap, and the third claim stays `waiting` with no steps
-- [ ] Stub model test, a failed claim doesn't stop the run: the second of three claims raises, the run carries on, and the third claim is decided
-- [ ] Stub model test, retried: a claim fails once, goes back in the queue, the queue stub works it again and it is decided
-- [ ] Stub model test, the missed-claims check: the queue stub calls `finish_run` with a claim still waiting under its cap; it is refused with that claim's id, the stub works it, and then `finish_run` succeeds
-- [ ] Stub model test: a queue stub that stops without finishing is told to carry on, and one that never finishes has its run finished by the harness with a note that it stopped early
-- [ ] Stub model test: a claim left `in_progress` before the run starts is released at the start and counts as a failed attempt
-- [ ] Stub model test: `uv run -m agent --cap 2` prints a line per claim, then the summary
-- [ ] Live: on a reseeded database, `uv run -m agent --cap 5` works five claims and finishes with a summary; 20 claims are still `waiting`, none is `in_progress`, and no claim has two decisions or two payments
-- [ ] `npm run check` passes
+- [x] pytest: the queue agent's tools are exactly `list_claims`, `record_todos`, `work_claim` and `finish_run`
+- [x] Stub model test, a whole run: the queue stub lists the claims, records a to-do list, works three claims (each with its own claim stub), ticks each off and finishes. The run is stored with its to-do list all `done` and the summary, and each claim has its own steps and thread id
+- [x] Stub model test, the cap: with cap 2, a third `work_claim` is refused with a message about the cap, and the third claim stays `waiting` with no steps
+- [x] Stub model test, a failed claim doesn't stop the run: the second of three claims raises, the run carries on, and the third claim is decided
+- [x] Stub model test, retried: a claim fails once, goes back in the queue, the queue stub works it again and it is decided
+- [x] Stub model test, the missed-claims check: the queue stub calls `finish_run` with a claim still waiting under its cap; it is refused with that claim's id, the stub works it, and then `finish_run` succeeds
+- [x] Stub model test: a queue stub that stops without finishing is told to carry on, and one that never finishes has its run finished by the harness with a note that it stopped early
+- [x] Stub model test: a claim left `in_progress` before the run starts is released at the start and counts as a failed attempt
+- [x] Stub model test: `uv run -m agent --cap 2` prints a line per claim, then the summary
+- [x] Live: on a reseeded database, `uv run -m agent --cap 5` works five claims and finishes with a summary; 20 claims are still `waiting`, none is `in_progress`, and no claim has two decisions or two payments
+- [x] `npm run check` passes
 
 ## Phase 5: The dashboard
 

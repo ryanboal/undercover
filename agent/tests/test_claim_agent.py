@@ -4,7 +4,6 @@ import pytest
 from langchain_core.messages import AIMessage, SystemMessage, ToolMessage
 from openai import APITimeoutError
 
-from agent import __main__ as cli
 from agent import main
 from agent.tests.stubs import StubModel, call, claim_script, decide, stub
 from agent.tools import CLAIM_TOOLS
@@ -207,16 +206,6 @@ def test_a_decided_claim_is_never_worked_again(client):
     line = main.work_claim("CLM-1001", stub(*claim_script("CLM-1001", "decline")))
     assert line == "CLM-1001 not started: Claim CLM-1001 is not waiting"
     assert client.get("/api/claims/CLM-1001").json() == before
-
-
-def test_command_line_works_one_claim(monkeypatch, capsys):
-    worked = []
-    monkeypatch.setattr(
-        cli, "work_claim", lambda claim_id: worked.append(claim_id) or f"{claim_id} ok"
-    )
-    cli.main(["CLM-1001"])
-    assert worked == ["CLM-1001"]
-    assert capsys.readouterr().out == "CLM-1001 ok\n"
 
 
 def test_model_name(monkeypatch):

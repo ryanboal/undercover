@@ -1,19 +1,22 @@
-"""Work the queue with the UnderCover Agent: uv run -m agent [CLM-1001]"""
+"""Run the UnderCover Agent: uv run -m agent [--cap N | CLM-1001]"""
 
+import argparse
 import sys
 
-from agent.main import call_backend, work_claim
+from agent.main import work_claim
+from agent.queue import run_queue
 
 
 def main(args: list[str]) -> None:
-    """Work the claim named on the command line, or every waiting claim."""
-    claim_ids = args or [
-        claim["claim_id"]
-        for claim in call_backend("GET", "/api/claims")
-        if claim["status"] == "waiting"
-    ]
-    for claim_id in claim_ids:
-        print(work_claim(claim_id), flush=True)
+    """Work one named claim, or the queue in one run up to a cap."""
+    parser = argparse.ArgumentParser(prog="uv run -m agent")
+    parser.add_argument("claim_id", nargs="?", help="work only this claim")
+    parser.add_argument("--cap", type=int, help="the most claims the run may work")
+    options = parser.parse_args(args)
+    if options.claim_id:
+        print(work_claim(options.claim_id))
+    else:
+        print(f"\n{run_queue(options.cap)}")
 
 
 if __name__ == "__main__":
