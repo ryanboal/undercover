@@ -188,9 +188,64 @@ p {
   background: var(--coral);
 }
 
-.status-waiting {
+.status-waiting,
+.todo-to_do {
   background: var(--cerulean);
   color: #ffffff;
+}
+
+.todo-in_progress {
+  background: var(--marigold);
+}
+
+.todo-done {
+  background: var(--sea-green);
+}
+
+.status-needs_handler,
+.todo-left_for_handler {
+  background: var(--raspberry);
+  color: #ffffff;
+}
+
+.todo-panel {
+  margin-bottom: 20px;
+}
+
+.todos {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.todo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.todo .chip {
+  min-width: 128px;
+  text-align: center;
+}
+
+.run-summary {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--inset);
+}
+
+.run-summary h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.run-summary p {
+  margin: 0;
+  white-space: pre-line;
 }
 
 .tiles {
@@ -471,4 +526,10 @@ p {
 
 .step details[open] summary code {
   display: none;
+}
+
+.step-error-text {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--raspberry) 20%, transparent);
 }

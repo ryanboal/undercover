@@ -190,16 +190,16 @@ Build the queue agent with `list_claims`, `record_todos`, `work_claim` and `fini
 
 Add the to-do list panel, the Needs a handler state, the `read` and `error` steps, and both sets of instructions.
 
-- [ ] vitest covers the to-do panel with no run, a run in progress and a finished run, each to-do status, the Needs a handler chip, `read` and `error` steps, and the instructions page with both parts, against a stubbed `fetch`
-- [ ] e2e: the test starts a run and records a to-do list through the API. Without a reload, the queue page shows the items; after the test updates and finishes the run, it shows them done and the summary
-- [ ] e2e: the test records a `read` step on a claim, and the claim page shows "Read" with the section's name, and the text when opened
-- [ ] e2e: a claim released twice through the API shows Needs a handler on the queue and the claim page
-- [ ] Browser, `/`: the to-do panel says "No runs yet" on a fresh database, and the state tiles show five states
-- [ ] Browser, `/instructions`: the queue agent's instructions, then the claim agent's, with no text box, input or edit button in the snapshot
-- [ ] Browser, with `browser_evaluate`: each to-do status and the Needs a handler chip have the background colors from the design
-- [ ] Browser: screenshots of the queue with a run in light and dark mode follow `BRAND.md`: rounded panels with no outlines, no one-edge borders and no gradients
-- [ ] Browser: `browser_console_messages` shows no errors on any page
-- [ ] `npm run check` passes
+- [x] vitest covers the to-do panel with no run, a run in progress and a finished run, each to-do status, the Needs a handler chip, `read` and `error` steps, and the instructions page with both parts, against a stubbed `fetch`
+- [x] e2e: the test starts a run and records a to-do list through the API. Without a reload, the queue page shows the items; after the test updates and finishes the run, it shows them done and the summary
+- [x] e2e: the test records a `read` step on a claim, and the claim page shows "Read" with the section's name, and the text when opened
+- [x] e2e: a claim released twice through the API shows Needs a handler on the queue and the claim page
+- [x] Browser, `/`: the to-do panel says "No runs yet" on a fresh database, and the state tiles show five states
+- [x] Browser, `/instructions`: the queue agent's instructions, then the claim agent's, with no text box, input or edit button in the snapshot
+- [x] Browser, with `browser_evaluate`: each to-do status and the Needs a handler chip have the background colors from the design
+- [x] Browser: screenshots of the queue with a run in light and dark mode follow `BRAND.md`: rounded panels with no outlines, no one-edge borders and no gradients
+- [x] Browser: `browser_console_messages` shows no errors on any page
+- [x] `npm run check` passes
 
 ## Phase 6: A live run and the documents
 

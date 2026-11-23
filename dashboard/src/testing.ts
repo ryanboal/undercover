@@ -54,6 +54,7 @@ export const claim: Claim = {
   ],
   status: "waiting",
   thread_id: null,
+  failed_attempts: 0,
   decision: null,
   payment: null,
 };
@@ -68,6 +69,7 @@ export const summary: ClaimSummary = {
   status: "waiting",
   decision: null,
   payout: null,
+  failed_attempts: 0,
 };
 
 export const policy: Policy = {

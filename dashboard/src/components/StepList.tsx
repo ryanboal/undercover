@@ -43,6 +43,23 @@ function StepBody({ step }: Readonly<{ step: Step }>) {
         <code className="mono">{step.content}</code>
       </p>
     );
+  if (step.kind === "read") {
+    const [title, ...text] = step.content.split("\n");
+    return (
+      <details>
+        <summary>
+          <span className="step-label">Read</span> {title}
+        </summary>
+        <pre className="step-result">{text.join("\n").trim()}</pre>
+      </details>
+    );
+  }
+  if (step.kind === "error")
+    return (
+      <p className="step-error-text">
+        <span className="step-label">Failed</span> {step.content}
+      </p>
+    );
   if (step.kind === "tool_result") {
     const summary =
       step.content.length > SUMMARY_LENGTH
