@@ -1,6 +1,7 @@
 """The UnderCover backend."""
 
 import json
+import re
 import sqlite3
 from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager, closing
@@ -8,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 
 from backend.database import connect, database_path, seed
 from backend.models import (
@@ -22,6 +23,8 @@ from backend.models import (
     PaymentRequest,
     Policy,
     PreviousClaim,
+    SearchResult,
+    Section,
     SignOffRequest,
     StartRequest,
     Step,
@@ -169,6 +172,36 @@ def get_instructions(db: Database) -> Instructions:
     """Get the agent's instructions, followed by the policy wording."""
     wording = db.execute("SELECT policy_wording FROM settings").fetchone()[0]
     return Instructions(text=f"{INSTRUCTIONS.read_text(encoding='utf-8')}\n{wording}")
+
+
+@app.get("/api/documents/search", operation_id="search_documents")
+def search_documents(
+    query: Annotated[str, Query(min_length=1)], db: Database
+) -> list[SearchResult]:
+    """Find the five sections of the wording and the manual that best match a query."""
+    words = re.findall(r"\w+", query)
+    if not words:
+        return []
+    rows = db.execute(
+        "SELECT document, number, title,"
+        " snippet(sections, 3, '', '', '...', 24) AS snippet"
+        " FROM sections WHERE sections MATCH ? ORDER BY rank LIMIT 5",
+        (" OR ".join(f'"{word}"' for word in words),),
+    ).fetchall()
+    return [SearchResult(**dict(row)) for row in rows]
+
+
+@app.get("/api/documents/{document}/sections/{number}", operation_id="read_section")
+def read_section(document: str, number: str, db: Database) -> Section:
+    """Read one section of the policy wording or the claims manual in full."""
+    row = db.execute(
+        "SELECT document, number, title, text FROM sections"
+        " WHERE document = ? AND number = ?",
+        (document, number),
+    ).fetchone()
+    if row is None:
+        raise HTTPException(404, f"Section {number} of {document} not found")
+    return Section(**dict(row))
 
 
 @app.get("/api/handlers", operation_id="list_handlers")

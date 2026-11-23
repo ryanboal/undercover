@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import sqlite3
 from contextlib import closing
 from pathlib import Path
@@ -59,6 +60,13 @@ CREATE TABLE steps (
     content TEXT NOT NULL,
     created_at TEXT NOT NULL
 );
+CREATE VIRTUAL TABLE sections USING fts5(
+    document UNINDEXED,
+    number UNINDEXED,
+    title,
+    text,
+    tokenize = 'porter unicode61'
+);
 CREATE VIEW claim_view AS
 SELECT
     claims.claim_id, claims.record, claims.status, claims.thread_id,
@@ -88,6 +96,19 @@ def connect() -> sqlite3.Connection:
 def load(name: str) -> Any:
     """Read one of the JSON files in data/."""
     return json.loads((DATA / name).read_text(encoding="utf-8"))
+
+
+DOCUMENTS = {"wording": "policy_wording.md", "manual": "claims_manual.md"}
+
+
+def split_sections(markdown: str) -> list[tuple[str, str, str]]:
+    """Split a document at its ## headings into (number, title, text)."""
+    sections = []
+    for part in re.split(r"^## ", markdown, flags=re.MULTILINE)[1:]:
+        heading, _, text = part.partition("\n")
+        number, _, title = heading.partition(". ")
+        sections.append((number, title.strip(), text.strip()))
+    return sections
 
 
 def seed(path: Path) -> dict[str, int]:
@@ -124,6 +145,12 @@ def seed(path: Path) -> dict[str, int]:
             "INSERT INTO claims VALUES (?, ?, ?, 'waiting', NULL)",
             [(c["claim_id"], c["customer_id"], json.dumps(c)) for c in claims],
         )
+        for document, name in DOCUMENTS.items():
+            markdown = (DATA / name).read_text(encoding="utf-8")
+            connection.executemany(
+                "INSERT INTO sections VALUES (?, ?, ?, ?)",
+                [(document, *section) for section in split_sections(markdown)],
+            )
     return {
         "claims": len(claims),
         "policies": len(policies),

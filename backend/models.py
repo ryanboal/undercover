@@ -111,6 +111,20 @@ class Step(BaseModel):
     created_at: str
 
 
+class Section(BaseModel):
+    document: str
+    number: str
+    title: str
+    text: str
+
+
+class SearchResult(BaseModel):
+    document: str
+    number: str
+    title: str
+    snippet: str
+
+
 class Instructions(BaseModel):
     text: str
 
