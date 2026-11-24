@@ -123,9 +123,25 @@ def test_a_payout_over_the_limit_is_held(client):
     assert client.get("/api/claims/CLM-1002").json()["payment"] is None
 
 
-def test_an_approval_left_unpaid_says_so():
+def test_an_approval_the_agent_left_unpaid_is_paid(client):
     model = stub(*claim_script("CLM-1001", "approve", 420.0))
-    assert main.work_claim("CLM-1001", model) == "CLM-1001 approve $420.00, not paid"
+    assert main.work_claim("CLM-1001", model) == "CLM-1001 approve $420.00, paid"
+    assert client.get("/api/claims/CLM-1001").json()["payment"]["amount"] == 420.0
+
+
+def test_a_failure_between_approving_and_paying_is_put_right(client):
+    model = stub(decide("CLM-1001", "approve", 420.0), *failures("too late"))
+    assert main.work_claim("CLM-1001", model) == "CLM-1001 approve $420.00, paid"
+    claim = client.get("/api/claims/CLM-1001").json()
+    assert claim["payment"]["amount"] == 420.0
+    assert claim["failed_attempts"] == 0
+
+
+def test_an_unpaid_approval_over_the_limit_is_still_held(client):
+    model = stub(*claim_script("CLM-1002", "approve", 1350.0))
+    line = main.work_claim("CLM-1002", model)
+    assert line == "CLM-1002 approve $1,350.00, held for sign-off"
+    assert client.get("/api/claims/CLM-1002").json()["payment"] is None
 
 
 @pytest.mark.parametrize("decision", ["decline", "refer"])

@@ -1,3 +1,4 @@
+import socket
 import sqlite3
 from contextlib import closing
 
@@ -245,3 +246,55 @@ def test_command_line_works_one_claim(monkeypatch, capsys):
     monkeypatch.setattr(cli, "work_claim", lambda claim_id: f"{claim_id} refer")
     cli.main(["CLM-1001"])
     assert capsys.readouterr().out == "CLM-1001 refer\n"
+
+
+@pytest.mark.parametrize("cap", ["0", "-1"])
+def test_command_line_refuses_a_cap_below_one(monkeypatch, capsys, cap):
+    runs = []
+    monkeypatch.setattr(cli, "run_queue", runs.append)
+    with pytest.raises(SystemExit):
+        cli.main(["--cap", cap])
+    assert "--cap must be at least 1" in capsys.readouterr().err
+    assert runs == []
+
+
+def test_a_cap_of_zero_never_means_the_whole_queue(client, three_waiting):
+    with pytest.raises(main.BackendError, match="422"):
+        queue.run_queue(0, stub(*finish()), claim_models())
+    assert client.get("/api/runs/current").json() is None
+
+
+def test_unpaid_approvals_from_an_earlier_run_are_paid_first(client, three_waiting):
+    for claim_id, payout in (("CLM-1001", 420.0), ("CLM-1002", 1350.0)):
+        client.post(f"/api/claims/{claim_id}/start", json={"thread_id": "crashed"})
+        client.post(
+            f"/api/claims/{claim_id}/decision",
+            json={
+                "decision": "approve",
+                "payout": payout,
+                "section": "Section 3, Trip Delay",
+                "reason": "Covered.",
+            },
+        )
+    model = stub(*work("CLM-1003"), *finish())
+    queue.run_queue(1, model, claim_models(CLM_1003=[decided("CLM-1003")]))
+    paid = client.get("/api/claims/CLM-1001").json()["payment"]
+    assert paid["amount"] == 420.0
+    held = client.get("/api/claims/CLM-1002").json()
+    assert held["status"] == "waiting_for_sign_off"
+    assert held["payment"] is None
+
+
+@pytest.mark.parametrize("args", [["--cap", "1"], ["CLM-1001"]])
+def test_only_one_agent_runs_at_a_time(client, monkeypatch, args):
+    client.post("/api/claims/CLM-1002/start", json={"thread_id": "first run"})
+    monkeypatch.setattr(cli, "run_queue", lambda cap: queue.run_queue(cap, stub()))
+    monkeypatch.setattr(cli, "work_claim", lambda claim_id: claim_id)
+    with socket.socket() as first:
+        first.bind(("127.0.0.1", 0))
+        monkeypatch.setattr(cli, "LOCK_PORT", first.getsockname()[1], raising=False)
+        with pytest.raises(SystemExit, match="already running"):
+            cli.main(args)
+    claim = client.get("/api/claims/CLM-1002").json()
+    assert claim["status"] == "in_progress"
+    assert claim["failed_attempts"] == 0

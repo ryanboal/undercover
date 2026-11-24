@@ -130,6 +130,20 @@ def outcome(claim: dict[str, Any]) -> str:
     return f"{claim['claim_id']} approve ${decision['payout']:,.2f}, {payment}"
 
 
+def pay_if_due(claim: dict[str, Any]) -> dict[str, Any]:
+    """Pay an approval within the limit that was left unpaid, and return the claim."""
+    decision = claim["decision"]
+    if (
+        claim["status"] != "decided"
+        or decision["decision"] != "approve"
+        or claim["payment"] is not None
+    ):
+        return claim
+    path = f"/api/claims/{claim['claim_id']}"
+    request("POST", f"{path}/payment", {"amount": decision["payout"]})
+    return call_backend("GET", path)
+
+
 def work_claim(claim_id: str, llm: BaseChatModel | None = None) -> str:
     """Work one claim with a fresh claim agent and report the outcome in a line."""
     thread_id = str(uuid.uuid4())
@@ -143,7 +157,7 @@ def work_claim(claim_id: str, llm: BaseChatModel | None = None) -> str:
         reason = f"{type(error).__name__}: {error}"[:300]
     claim = call_backend("GET", f"/api/claims/{claim_id}")
     if claim["status"] != "in_progress":
-        return outcome(claim)
+        return outcome(pay_if_due(claim))
     claim = call_backend("POST", f"/api/claims/{claim_id}/release", {"reason": reason})
     if claim["status"] == "needs_handler":
         return f"{claim_id} failed twice ({reason}), left for a handler"

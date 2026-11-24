@@ -13,7 +13,7 @@ from langchain_core.tools import BaseTool, tool
 from langgraph.checkpoint.memory import InMemorySaver
 
 from agent import main
-from agent.main import call_backend, model, model_retry
+from agent.main import call_backend, model, model_retry, pay_if_due
 from agent.tools import reply, request
 
 NUDGES = 2
@@ -106,9 +106,11 @@ def queue_tools(run: Run) -> list[BaseTool]:
     return [list_claims, record_todos, work_claim, finish_run]
 
 
-def release_stale_claims() -> None:
-    """Put right claims an earlier run left in progress, as failed attempts."""
+def put_right_earlier_runs() -> None:
+    """Release claims an earlier run left in progress, and pay approvals it left."""
     for claim in call_backend("GET", "/api/claims"):
+        if claim["decision"] == "approve":
+            pay_if_due(call_backend("GET", f"/api/claims/{claim['claim_id']}"))
         if claim["status"] == "in_progress":
             call_backend(
                 "POST", f"/api/claims/{claim['claim_id']}/release", {"reason": STALE}
@@ -121,8 +123,9 @@ def run_queue(
     claim_llm: Callable[[str], BaseChatModel] | None = None,
 ) -> str:
     """Work the queue in one run, up to the cap, and return the run's summary."""
-    release_stale_claims()
-    cap = cap or max(len(waiting_claims()), 1)
+    put_right_earlier_runs()
+    if cap is None:
+        cap = max(len(waiting_claims()), 1)
     started = call_backend("POST", "/api/runs", {"cap": cap})
     run = Run(started["run_id"], cap, claim_llm or (lambda _: model()))
     middleware: list[AgentMiddleware[Any, Any]] = [
