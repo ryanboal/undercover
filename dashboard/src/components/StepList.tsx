@@ -3,6 +3,7 @@ import { api, type Step } from "../api";
 import { time } from "../format";
 import { REFRESH_MS, useLoad } from "../useLoad";
 import { Message } from "./Message";
+import { Panel } from "./Panel";
 
 const SUMMARY_LENGTH = 90;
 
@@ -11,8 +12,7 @@ export function StepList({ claimId }: Readonly<{ claimId: string }>) {
   const { data: steps, error } = useLoad(load, REFRESH_MS);
 
   return (
-    <section className="panel" aria-labelledby="steps-title">
-      <h2 id="steps-title">Agent at work</h2>
+    <Panel title="Agent at work">
       {!steps && <Message error={error} />}
       {steps?.length === 0 && (
         <p className="muted">
@@ -31,7 +31,7 @@ export function StepList({ claimId }: Readonly<{ claimId: string }>) {
           ))}
         </ol>
       )}
-    </section>
+    </Panel>
   );
 }
 

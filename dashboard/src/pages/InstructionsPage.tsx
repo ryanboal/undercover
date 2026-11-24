@@ -1,6 +1,7 @@
 import { api } from "../api";
 import { Message } from "../components/Message";
 import { useLoad } from "../useLoad";
+import { Panel } from "../components/Panel";
 
 export function InstructionsPage() {
   const { data, error } = useLoad(api.getInstructions);
@@ -15,14 +16,12 @@ export function InstructionsPage() {
       </p>
       {data ? (
         <>
-          <section className="panel" aria-labelledby="queue-title">
-            <h2 id="queue-title">Running the queue</h2>
+          <Panel title="Running the queue">
             <pre className="instructions">{data.queue}</pre>
-          </section>
-          <section className="panel" aria-labelledby="claim-title">
-            <h2 id="claim-title">Working a claim</h2>
+          </Panel>
+          <Panel title="Working a claim">
             <pre className="instructions">{data.claim}</pre>
-          </section>
+          </Panel>
         </>
       ) : (
         <section className="panel">

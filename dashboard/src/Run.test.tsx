@@ -187,3 +187,12 @@ it("says when a claim is left for a handler", async () => {
     ),
   ).toBeDefined();
 });
+
+it("shows two items with the same text", async () => {
+  const complain = vi.spyOn(console, "error").mockReturnValue();
+  const todo = { task: "Try again", status: "to_do" } as const;
+  showQueue({ ...running, todos: [todo, todo] });
+  expect(await screen.findAllByText("Try again")).toHaveLength(2);
+  expect(complain).not.toHaveBeenCalled();
+  complain.mockRestore();
+});

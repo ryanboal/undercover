@@ -4,10 +4,8 @@ import argparse
 import socket
 import sys
 
-import httpx
-
-from agent.main import work_claim
-from agent.queue import run_queue
+from agent.api import BackendError, Unreachable
+from agent.harness import run_queue, work_claim
 
 LOCK_PORT = 8765
 
@@ -31,11 +29,13 @@ def main(args: list[str]) -> None:
                 print(work_claim(options.claim_id))
             else:
                 print(f"\n{run_queue(options.cap)}")
-        except httpx.TransportError as error:
+        except Unreachable as error:
             sys.exit(
                 f"The backend can't be reached ({error}). The next queue run puts"
                 " right anything left half done."
             )
+        except BackendError as error:
+            sys.exit(str(error))
 
 
 if __name__ == "__main__":

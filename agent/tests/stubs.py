@@ -36,10 +36,9 @@ def call(name, text="", **args):
     )
 
 
-def decide(claim_id, decision, payout, section="Section 3, Trip Delay"):
+def decide(decision, payout, section="Section 3, Trip Delay"):
     return call(
         "record_decision",
-        claim_id=claim_id,
         decision=decision,
         payout=payout,
         section=section,
@@ -47,11 +46,11 @@ def decide(claim_id, decision, payout, section="Section 3, Trip Delay"):
     )
 
 
-def claim_script(claim_id, decision="refer", payout: float = 0, *extra):
+def claim_script(decision="refer", payout: float = 0, *extra):
     """A claim agent that reads the claim, decides, does anything extra and replies."""
     return [
-        call("get_claim", claim_id=claim_id),
-        decide(claim_id, decision, payout),
+        call("get_claim"),
+        decide(decision, payout),
         *extra,
         AIMessage(content=f"Decision: {decision}."),
     ]

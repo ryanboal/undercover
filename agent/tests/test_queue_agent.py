@@ -6,8 +6,10 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from agent import __main__ as cli
-from agent import main, queue
+from agent import harness, rules
+from agent.api import Refused
 from agent.tests.stubs import call, claim_script, stub
+from agent.tools import QUEUE_TOOLS
 
 
 @pytest.fixture
@@ -21,7 +23,7 @@ def three_waiting(database):
 
 
 def failures():
-    return [ValueError("The provider is down")] * (main.MODEL_RETRIES + 1)
+    return [ValueError("The provider is down")] * (harness.MODEL_RETRIES + 1)
 
 
 def claim_models(**attempts):
@@ -30,8 +32,8 @@ def claim_models(**attempts):
     return lambda claim_id: stub(*scripts[claim_id.replace("-", "_")].pop(0))
 
 
-def decided(claim_id):
-    return claim_script(claim_id, "refer")
+def decided():
+    return claim_script("refer")
 
 
 def todos(*statuses):
@@ -55,8 +57,7 @@ def tool_replies(model):
 
 
 def test_the_queue_agent_has_four_tools():
-    run = queue.Run("run-1", 5, lambda _: stub())
-    names = [t.name for t in queue.queue_tools(run)]
+    names = [t.name for t in QUEUE_TOOLS]
     assert names == ["list_claims", "record_todos", "work_claim", "finish_run"]
 
 
@@ -69,11 +70,11 @@ def test_a_whole_run(client, three_waiting):
         *finish("Worked 3 claims: 3 referred."),
     )
     claims = claim_models(
-        CLM_1001=[decided("CLM-1001")],
-        CLM_1002=[decided("CLM-1002")],
-        CLM_1003=[decided("CLM-1003")],
+        CLM_1001=[decided()],
+        CLM_1002=[decided()],
+        CLM_1003=[decided()],
     )
-    assert queue.run_queue(5, model, claims) == "Worked 3 claims: 3 referred."
+    assert harness.run_queue(5, model, claims) == "Worked 3 claims: 3 referred."
 
     run = client.get("/api/runs/current").json()
     assert run["cap"] == 5
@@ -103,10 +104,8 @@ def test_a_whole_run(client, three_waiting):
 
 def test_the_cap(client, three_waiting):
     model = stub(*work("CLM-1001", "CLM-1002", "CLM-1003"), *finish())
-    claims = claim_models(
-        CLM_1001=[decided("CLM-1001")], CLM_1002=[decided("CLM-1002")]
-    )
-    queue.run_queue(2, model, claims)
+    claims = claim_models(CLM_1001=[decided()], CLM_1002=[decided()])
+    harness.run_queue(2, model, claims)
 
     refusal = tool_replies(model)[2]
     assert refusal == (
@@ -125,11 +124,11 @@ def test_a_failed_claim_does_not_stop_the_run_and_is_retried(client, three_waiti
         *finish(),
     )
     claims = claim_models(
-        CLM_1001=[decided("CLM-1001")],
-        CLM_1002=[failures(), decided("CLM-1002")],
-        CLM_1003=[decided("CLM-1003")],
+        CLM_1001=[decided()],
+        CLM_1002=[failures(), decided()],
+        CLM_1003=[decided()],
     )
-    queue.run_queue(3, model, claims)
+    harness.run_queue(3, model, claims)
 
     replies = tool_replies(model)
     assert replies[1] == (
@@ -148,7 +147,7 @@ def test_a_failed_claim_does_not_stop_the_run_and_is_retried(client, three_waiti
 def test_a_claim_that_fails_twice_is_left_for_a_handler(client, three_waiting):
     model = stub(*work("CLM-1001", "CLM-1001"), *finish())
     claims = claim_models(CLM_1001=[failures(), failures()])
-    queue.run_queue(1, model, claims)
+    harness.run_queue(1, model, claims)
 
     assert tool_replies(model)[1].endswith("left for a handler")
     assert client.get("/api/claims/CLM-1001").json()["status"] == "needs_handler"
@@ -163,11 +162,11 @@ def test_the_check_for_missed_claims(client, three_waiting):
         *finish(),
     )
     claims = claim_models(
-        CLM_1001=[decided("CLM-1001")],
-        CLM_1002=[decided("CLM-1002")],
-        CLM_1003=[decided("CLM-1003")],
+        CLM_1001=[decided()],
+        CLM_1002=[decided()],
+        CLM_1003=[decided()],
     )
-    queue.run_queue(3, model, claims)
+    harness.run_queue(3, model, claims)
 
     assert tool_replies(model)[2] == (
         "Refused: these waiting claims can still be worked in this run: CLM-1003."
@@ -183,22 +182,22 @@ def test_a_queue_agent_that_stops_early_is_told_to_carry_on(client, three_waitin
         *work("CLM-1001"),
         *finish(),
     )
-    queue.run_queue(1, model, claim_models(CLM_1001=[decided("CLM-1001")]))
+    harness.run_queue(1, model, claim_models(CLM_1001=[decided()]))
 
     nudges = [m for m in model.prompts[-1] if isinstance(m, HumanMessage)]
-    assert nudges[-1].text == queue.CARRY_ON
+    assert nudges[-1].text == harness.CARRY_ON
     assert client.get("/api/runs/current").json()["summary"] == "Worked the queue."
 
 
 def test_a_queue_agent_that_never_finishes(client, three_waiting):
-    model = stub(*[AIMessage(content="Hmm.")] * (1 + queue.NUDGES))
-    summary = queue.run_queue(1, model, claim_models())
+    model = stub(*[AIMessage(content="Hmm.")] * (1 + harness.NUDGES))
+    summary = harness.run_queue(1, model, claim_models())
     assert summary == "The agent stopped before finishing the run."
     assert client.get("/api/runs/current").json()["finished_at"]
 
 
 def test_a_queue_agent_that_fails(client, three_waiting):
-    summary = queue.run_queue(1, stub(*failures()), claim_models())
+    summary = harness.run_queue(1, stub(*failures()), claim_models())
     assert summary == (
         "The agent stopped before finishing the run. ValueError: The provider is down"
     )
@@ -210,28 +209,26 @@ def test_claims_left_in_progress_are_released_first(client, database):
     client.post("/api/claims/CLM-1001/start", json={"thread_id": "crashed"})
 
     model = stub(*work("CLM-1001"), *finish())
-    queue.run_queue(None, model, claim_models(CLM_1001=[decided("CLM-1001")]))
+    harness.run_queue(None, model, claim_models(CLM_1001=[decided()]))
 
     claim = client.get("/api/claims/CLM-1001").json()
     assert claim["status"] == "decided"
     assert claim["failed_attempts"] == 1
     steps = client.get("/api/claims/CLM-1001/steps").json()
-    assert (steps[0]["kind"], steps[0]["content"]) == ("error", queue.STALE)
+    assert (steps[0]["kind"], steps[0]["content"]) == ("error", rules.STALE)
     assert client.get("/api/runs/current").json()["cap"] == 1
 
 
 def test_without_a_cap_the_run_may_work_every_waiting_claim(client, three_waiting):
-    queue.run_queue(None, stub(*finish()), claim_models())
+    harness.run_queue(None, stub(*finish()), claim_models())
     assert client.get("/api/runs/current").json()["cap"] == 3
 
 
 def test_command_line_runs_the_queue(monkeypatch, capsys, three_waiting):
     model = stub(*work("CLM-1001", "CLM-1002"), *finish("Worked 2 claims."))
-    claims = claim_models(
-        CLM_1001=[decided("CLM-1001")], CLM_1002=[decided("CLM-1002")]
-    )
+    claims = claim_models(CLM_1001=[decided()], CLM_1002=[decided()])
     monkeypatch.setattr(
-        cli, "run_queue", lambda cap: queue.run_queue(cap, model, claims)
+        cli, "run_queue", lambda cap: harness.run_queue(cap, model, claims)
     )
     cli.main(["--cap", "2"])
     assert capsys.readouterr().out.splitlines() == [
@@ -259,8 +256,8 @@ def test_command_line_refuses_a_cap_below_one(monkeypatch, capsys, cap):
 
 
 def test_a_cap_of_zero_never_means_the_whole_queue(client, three_waiting):
-    with pytest.raises(main.BackendError, match="422"):
-        queue.run_queue(0, stub(*finish()), claim_models())
+    with pytest.raises(Refused, match="422"):
+        harness.run_queue(0, stub(*finish()), claim_models())
     assert client.get("/api/runs/current").json() is None
 
 
@@ -277,7 +274,7 @@ def test_unpaid_approvals_from_an_earlier_run_are_paid_first(client, three_waiti
             },
         )
     model = stub(*work("CLM-1003"), *finish())
-    queue.run_queue(1, model, claim_models(CLM_1003=[decided("CLM-1003")]))
+    harness.run_queue(1, model, claim_models(CLM_1003=[decided()]))
     paid = client.get("/api/claims/CLM-1001").json()["payment"]
     assert paid["amount"] == 420.0
     held = client.get("/api/claims/CLM-1002").json()
@@ -288,7 +285,7 @@ def test_unpaid_approvals_from_an_earlier_run_are_paid_first(client, three_waiti
 @pytest.mark.parametrize("args", [["--cap", "1"], ["CLM-1001"]])
 def test_only_one_agent_runs_at_a_time(client, monkeypatch, args):
     client.post("/api/claims/CLM-1002/start", json={"thread_id": "first run"})
-    monkeypatch.setattr(cli, "run_queue", lambda cap: queue.run_queue(cap, stub()))
+    monkeypatch.setattr(cli, "run_queue", lambda cap: harness.run_queue(cap, stub()))
     monkeypatch.setattr(cli, "work_claim", lambda claim_id: claim_id)
     with socket.socket() as first:
         first.bind(("127.0.0.1", 0))

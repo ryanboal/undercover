@@ -3,13 +3,13 @@ import { time } from "../format";
 import { REFRESH_MS, useLoad } from "../useLoad";
 import { TodoChip } from "./Chips";
 import { Message } from "./Message";
+import { Panel } from "./Panel";
 
 export function TodoPanel() {
   const { data: run, error } = useLoad(api.getCurrentRun, REFRESH_MS);
 
   return (
-    <section className="panel todo-panel" aria-labelledby="todo-title">
-      <h2 id="todo-title">Agent's to-do list</h2>
+    <Panel title="Agent's to-do list" className="todo-panel">
       {run === undefined && <Message error={error} />}
       {run === null && (
         <p className="muted">
@@ -28,8 +28,8 @@ export function TodoPanel() {
             <p className="muted">The agent is planning its work.</p>
           ) : (
             <ol className="todos">
-              {run.todos.map((todo) => (
-                <li key={todo.task} className="todo">
+              {run.todos.map((todo, position) => (
+                <li key={`${String(position)} ${todo.task}`} className="todo">
                   <TodoChip status={todo.status} />
                   <span>{todo.task}</span>
                 </li>
@@ -44,6 +44,6 @@ export function TodoPanel() {
           )}
         </>
       )}
-    </section>
+    </Panel>
   );
 }

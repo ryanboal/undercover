@@ -2,6 +2,7 @@ import type { Claim } from "../api";
 import { money, time } from "../format";
 import { DecisionChip } from "./Chips";
 import { SignOffForm } from "./SignOffForm";
+import { Panel } from "./Panel";
 
 export function DecisionPanel({
   claim,
@@ -10,8 +11,7 @@ export function DecisionPanel({
   const { decision, payment } = claim;
 
   return (
-    <section className="panel" aria-labelledby="decision-title">
-      <h2 id="decision-title">Decision</h2>
+    <Panel title="Decision">
       {!decision && <p className="muted">{progress(claim)}</p>}
       {decision && (
         <>
@@ -45,7 +45,7 @@ export function DecisionPanel({
           <SignOffForm claimId={claim.claim_id} onSignedOff={onSignedOff} />
         </div>
       )}
-    </section>
+    </Panel>
   );
 }
 

@@ -3,7 +3,7 @@ from contextlib import closing
 
 import pytest
 
-from backend.database import split_sections
+from backend.seed import split_sections
 
 
 def test_seeding_splits_both_documents_into_sections(database):
