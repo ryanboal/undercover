@@ -4,6 +4,8 @@ import argparse
 import socket
 import sys
 
+import httpx
+
 from agent.main import work_claim
 from agent.queue import run_queue
 
@@ -24,10 +26,16 @@ def main(args: list[str]) -> None:
             lock.bind(("127.0.0.1", LOCK_PORT))
         except OSError:
             sys.exit("The agent is already running. Try again when it has finished.")
-        if options.claim_id:
-            print(work_claim(options.claim_id))
-        else:
-            print(f"\n{run_queue(options.cap)}")
+        try:
+            if options.claim_id:
+                print(work_claim(options.claim_id))
+            else:
+                print(f"\n{run_queue(options.cap)}")
+        except httpx.TransportError as error:
+            sys.exit(
+                f"The backend can't be reached ({error}). The next queue run puts"
+                " right anything left half done."
+            )
 
 
 if __name__ == "__main__":

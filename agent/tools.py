@@ -1,5 +1,6 @@
 """The agent's tools, each named after the backend operation it calls."""
 
+import time
 from typing import Any, Literal
 from urllib.parse import urlencode
 
@@ -7,6 +8,7 @@ import httpx
 from langchain_core.tools import tool
 
 BACKEND_URL = "http://localhost:8000"
+CONNECT_DELAYS = (1, 2, 4, 8, 15)
 
 
 def backend() -> httpx.Client:
@@ -17,7 +19,17 @@ def backend() -> httpx.Client:
 def request(
     method: str, path: str, body: dict[str, Any] | None = None
 ) -> httpx.Response:
-    """Send one request to the backend."""
+    """Send a request to the backend, trying again only when it couldn't connect."""
+    for delay in CONNECT_DELAYS:
+        try:
+            return send(method, path, body)
+        except (httpx.ConnectError, httpx.ConnectTimeout):
+            time.sleep(delay)
+    return send(method, path, body)
+
+
+def send(method: str, path: str, body: dict[str, Any] | None) -> httpx.Response:
+    """Send one request to the backend, once."""
     with backend() as client:
         return client.request(method, path, json=body)
 

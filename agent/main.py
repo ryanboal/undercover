@@ -60,7 +60,7 @@ def call_backend(method: str, path: str, body: dict[str, Any] | None = None) -> 
     """Call the backend and return its JSON, raising if it refuses."""
     response = request(method, path, body)
     if response.is_error:
-        raise BackendError(f"{response.status_code}: {response.json()['detail']}")
+        raise BackendError(f"{response.status_code}: {response.text}")
     return response.json()
 
 
@@ -148,6 +148,8 @@ def work_claim(claim_id: str, llm: BaseChatModel | None = None) -> str:
     """Work one claim with a fresh claim agent and report the outcome in a line."""
     thread_id = str(uuid.uuid4())
     started = request("POST", f"/api/claims/{claim_id}/start", {"thread_id": thread_id})
+    if started.is_server_error:
+        raise BackendError(f"{started.status_code}: {started.text}")
     if started.is_error:
         return f"{claim_id} not started: {started.json()['detail']}"
     reason = "The agent finished without recording a decision"

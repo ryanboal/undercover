@@ -5,15 +5,21 @@ from dataclasses import dataclass, field
 from threading import Lock
 from typing import Any, Literal, TypedDict
 
+import httpx
 from langchain.agents import create_agent
-from langchain.agents.middleware import AgentMiddleware, ModelCallLimitMiddleware
+from langchain.agents.middleware import (
+    AgentMiddleware,
+    ModelCallLimitMiddleware,
+    ToolCallRequest,
+    ToolErrorMiddleware,
+)
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool, tool
 from langgraph.checkpoint.memory import InMemorySaver
 
 from agent import main
-from agent.main import call_backend, model, model_retry, pay_if_due
+from agent.main import BackendError, call_backend, model, model_retry, pay_if_due
 from agent.tools import reply, request
 
 NUDGES = 2
@@ -21,7 +27,7 @@ CARRY_ON = (
     "You haven't finished the run. Carry on with the queue, and call finish_run"
     " when every claim is done or left for a handler."
 )
-STALE = "An earlier run stopped before deciding this claim"
+STALE = "Work on this claim stopped before it was decided"
 
 
 class TodoItem(TypedDict):
@@ -84,30 +90,52 @@ def queue_tools(run: Run) -> list[BaseTool]:
                     f"Refused: the run is capped at {run.cap} claims and has worked"
                     f" {', '.join(sorted(run.attempted))}"
                 )
+            before = set(run.attempted)
+            run.attempted.add(claim_id)
             line = main.work_claim(claim_id, run.claim_llm(claim_id))
-            if " not started: " not in line:
-                run.attempted.add(claim_id)
+            if " not started: " in line:
+                run.attempted = before
             print(line, flush=True)
             return line
 
     @tool
     def finish_run(summary: str) -> str:
         """Finish the run with a short summary for the handlers."""
-        missed = missed_claims(run)
+        with run.one_at_a_time:
+            put_right()
+            missed = missed_claims(run)
         if missed:
             return (
                 "Refused: these waiting claims can still be worked in this run:"
                 f" {', '.join(missed)}. Work them, then finish."
             )
-        call_backend("POST", f"/api/runs/{run.run_id}/finish", {"summary": summary})
-        run.finished = True
+        close(run, summary)
         return "The run is finished."
 
     return [list_claims, record_todos, work_claim, finish_run]
 
 
-def put_right_earlier_runs() -> None:
-    """Release claims an earlier run left in progress, and pay approvals it left."""
+def backend_trouble(error: Exception, _: ToolCallRequest) -> str | None:
+    """Tell the queue agent when the backend fails, so that the run carries on."""
+    if isinstance(error, httpx.TransportError | BackendError):
+        return (
+            f"The backend had a problem ({type(error).__name__}: {error})."
+            " Carry on; finish_run puts right anything left half done."
+        )
+    return None
+
+
+def close(run: Run, summary: str) -> None:
+    """Finish the run, unless an earlier try already did."""
+    path = f"/api/runs/{run.run_id}/finish"
+    response = request("POST", path, {"summary": summary})
+    if response.is_error and response.status_code != httpx.codes.CONFLICT:
+        raise BackendError(f"{response.status_code}: {response.text}")
+    run.finished = True
+
+
+def put_right() -> None:
+    """Release claims left in progress, and pay approvals left unpaid."""
     for claim in call_backend("GET", "/api/claims"):
         if claim["decision"] == "approve":
             pay_if_due(call_backend("GET", f"/api/claims/{claim['claim_id']}"))
@@ -123,7 +151,7 @@ def run_queue(
     claim_llm: Callable[[str], BaseChatModel] | None = None,
 ) -> str:
     """Work the queue in one run, up to the cap, and return the run's summary."""
-    put_right_earlier_runs()
+    put_right()
     if cap is None:
         cap = max(len(waiting_claims()), 1)
     started = call_backend("POST", "/api/runs", {"cap": cap})
@@ -131,6 +159,7 @@ def run_queue(
     middleware: list[AgentMiddleware[Any, Any]] = [
         ModelCallLimitMiddleware(thread_limit=4 * cap + 10, exit_behavior="error"),
         model_retry(),
+        ToolErrorMiddleware(backend_trouble),
     ]
     agent = create_agent(
         llm or model(),
@@ -153,5 +182,6 @@ def run_queue(
         message = CARRY_ON
     if not run.finished:
         summary = f"The agent stopped before finishing the run.{stopped}"
-        call_backend("POST", f"/api/runs/{run.run_id}/finish", {"summary": summary})
+        put_right()
+        close(run, summary)
     return call_backend("GET", "/api/runs/current")["summary"]
