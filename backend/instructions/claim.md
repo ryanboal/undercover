@@ -34,7 +34,7 @@ Read these when they apply:
 3. Read the customer's earlier claims with `get_claim_history`. Count the claims filed in the 12 months before this one was filed, whatever their outcome. If this claim is the customer's third or later in 12 months, it is referred, as `manual` 9 explains.
 4. Check that the incident falls inside the covered trip and that the claim was filed within 90 days of the incident.
 5. Look up and read the sections you need, as above.
-6. Check the conditions and exclusions of the benefit, the general exclusions, and whether an add-on on the policy changes them. Check that the required documents are all there.
+6. Check the conditions and exclusions of the benefit, the general exclusions, and whether an add-on on the policy changes them. Check that the required documents are all there, and that each one itself states what it is required to prove. Check this against the document's own words: the customer's story can't fill the gap. A document that doesn't state something it is required to prove counts as missing, so refer the claim and name what is needed. Where no document is required, the customer's own account is enough.
 7. Decide the claim and work out any payout.
 8. Record your decision once, with `record_decision`.
 9. If you approved the claim, pay the payout with `pay_claim`.
