@@ -255,3 +255,16 @@ def test_the_model_never_sees_what_the_code_knows():
 def test_an_odd_id_cannot_reach_another_operation(odd):
     with pytest.raises(api.Refused, match="404"):
         api.get_policy(odd)
+
+
+def test_the_model_is_told_when_nothing_is_found(client):
+    assert client.get("/api/customers/CUS-3005/claims").json() == []
+    model = stub(
+        call("get_claim_history", customer_id="CUS-3005"),
+        call("search_documents", query="zzzz"),
+        *claim_script(),
+    )
+    harness.work_claim("CLM-1003", model)
+    history, search = [m for m in model.prompts[2] if isinstance(m, ToolMessage)]
+    assert history.content == "This customer has no earlier claims."
+    assert search.content == "No sections match that search."

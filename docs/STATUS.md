@@ -15,13 +15,30 @@ The claims pilot in `docs/PLAN.md` and the agent's harness in `docs/PLAN_HARNESS
   - `api.py`: every backend call, one function per operation. It tries again for about 30 seconds when it can't connect, and never repeats a request that may have arrived.
   - `context.py`: what the code knows and the model can't change, such as the claim being worked and the cap.
   - `rules.py`: outcomes, payments that are due, missed claims and putting right work left half done.
-  - `tools.py`: all the tools, with their state from `ToolRuntime`. A claim agent can only act on its own claim.
+  - `tools.py`: all the tools, with their state from `ToolRuntime`. A claim agent can only act on its own claim. Tools always give the model text, and say so when nothing is found.
   - `steps.py`: an agent's messages as steps for the dashboard.
   - `harness.py`: the model, the two agents with their middleware, and `work_claim` and `run_queue`, which run them. Provider errors are retried 3 times and a claim agent stops after 25 model calls. A failure before a decision releases the claim, and an approval within the limit that was left unpaid is paid. A queue agent that stops early is told to carry on, twice, before the harness closes the run.
 - `dashboard/`: the queue (`/`), with counts by state (including Needs a handler), the agent's to-do list for the current run with its summary once finished, and a line per claim. A claim in full (`/claims/:claimId`), with its policy, earlier claims, the decision and payment, the agent's steps as it works (including the sections it read and any failed attempts), and a sign-off form for a held payout. The agent's instructions for running the queue and for working a claim (`/instructions`), read only. The queue and a claim page refresh every two seconds. Styled to `BRAND.md` in light and dark mode.
 - `e2e/`: tests of the three pages, the agent's steps appearing on a claim page, a handler signing off a held payout, the to-do list filling in and finishing, a section read, and a claim that fails twice needing a handler. Playwright runs its own backend on port 8001 with `e2e/undercover.db`, and its own dashboard on port 5174, so it can run next to `npm run dev`.
 
-## Last live run
+## Last live runs: the two sets of instructions compared
+
+On November 27, 2026, the same model worked all 25 claims six times, each in its own temporary database: three runs with the step-by-step instructions from before the review and three with the goal instructions, alternating, on the same harness. Scored against the handlers' decisions and payouts:
+
+| Run | Step-by-step | Goals |
+|---|---|---|
+| 1 | 25/25 | 25/25 |
+| 2 | 23/25 | 24/25 |
+| 3 | 25/25 | 22/25 |
+| Total | 73/75 | 71/75 |
+| Sections read per claim | 8.4 | 10.6 |
+| Claims that searched, per run | about 2 | about 16 |
+
+Each run took 7 to 10 minutes. No claim was missed twice: the misses were CLM-1014 (paid $545.00, handler $605.00) and CLM-1023 (paid $61.00, handler referred) with the step-by-step instructions, and CLM-1021 (approved $1,053.00 and held for sign-off, handler $825.00), CLM-1024 and CLM-1025 (paid $250.00 and $71.00, handler referred both) and CLM-1006 (left for a handler) with the goals. CLM-1012, missed in the run below, was right all six times. Two claims in 75 can't separate the two: they decide about as well, and the goal instructions read and search more.
+
+CLM-1006 was left for a handler because its customer has no earlier claims. The history tool gave the model an empty reply, so it asked again, up to 37 times, until it ran out of model calls. It looped in three of the six runs, with both sets of instructions. Tools now always give the model text, with a sentence when nothing is found, and a check stops a tool returning a bare list (rule 13 in `docs/CODE_STANDARDS.md`). With the fix, CLM-1006 was worked three times live: one history call each time, approved at $425.00, as the handler did.
+
+## Earlier live run, with the goal instructions
 
 On November 24, 2026, after the restructure and with instructions that give goals instead of steps, the same model worked all 25 claims in a temporary database: 15 approve, 4 decline and 6 refer. No claim failed, every payment was right for its decision, and three approvals over $1,000 were held. The run took 54 minutes, 44 of them while the computer was asleep. Each claim agent read between 6 and 16 sections, 11.4 on average, and 18 of the 25 searched.
 

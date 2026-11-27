@@ -12,5 +12,6 @@
 10. Functions do one thing, in 40 lines or fewer in the agent. Signal problems with exceptions, never by matching text.
 11. Instructions give an agent a goal, what to rely on and its boundaries. They are never a numbered script: if the steps are fixed, write code.
 12. Don't repeat markup or row mapping. Extract it the second time.
+13. A tool always gives the model something to read. Return text or a record, never a bare list, and say so in a sentence when nothing is found: an empty reply looks like a failed call, and the model asks again.
 
 `agent/tests/test_structure.py` enforces 7 to 11 for the agent as far as a test can, and ESLint enforces 7 for the dashboard.

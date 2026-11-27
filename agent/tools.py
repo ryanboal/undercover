@@ -1,5 +1,6 @@
 """The agents' tools, each named after the backend operation it calls."""
 
+import json
 from typing import Literal, TypedDict
 
 from langchain.tools import ToolRuntime, tool
@@ -10,6 +11,11 @@ from agent.api import Record
 from agent.context import ClaimContext, RunContext
 
 DOCUMENT_NAMES = {"wording": "Policy wording", "manual": "Claims manual"}
+
+
+def found(records: list[Record], none: str) -> str:
+    """The records as JSON, or a sentence when there are none."""
+    return json.dumps(records) if records else none
 
 
 @tool
@@ -25,15 +31,16 @@ def get_policy(policy_id: str) -> Record:
 
 
 @tool
-def get_claim_history(customer_id: str) -> list[Record]:
+def get_claim_history(customer_id: str) -> str:
     """Get a customer's earlier claims, with the outcome and the amount paid."""
-    return api.get_claim_history(customer_id)
+    records = api.get_claim_history(customer_id)
+    return found(records, "This customer has no earlier claims.")
 
 
 @tool
-def search_documents(query: str) -> list[Record]:
+def search_documents(query: str) -> str:
     """Search the policy wording and the claims manual for the five best sections."""
-    return api.search_documents(query)
+    return found(api.search_documents(query), "No sections match that search.")
 
 
 @tool

@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+from agent.tools import CLAIM_TOOLS, QUEUE_TOOLS
+
 AGENT = Path(__file__).parent.parent
 INSTRUCTIONS = AGENT.parent / "backend" / "instructions"
 LAYERS = ["api", "context", "rules", "tools", "steps", "harness", "__main__"]
@@ -66,3 +68,10 @@ def test_instructions_give_goals_not_steps(name):
     assert "## Your goal" in text
     assert not re.search(r"^\s*\d+[.)] ", text, re.MULTILINE), "numbered steps"
     assert len(text.split()) <= 500
+
+
+def test_tools_never_return_a_bare_list():
+    """An empty list reaches the model as an empty reply, so it asks again."""
+    for t in CLAIM_TOOLS + QUEUE_TOOLS:
+        returns = t.func.__annotations__["return"]  # type: ignore[attr-defined]
+        assert getattr(returns, "__origin__", returns) is not list, t.name
