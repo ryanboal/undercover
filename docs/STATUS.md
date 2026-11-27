@@ -38,6 +38,15 @@ Each run took 7 to 10 minutes. No claim was missed twice: the misses were CLM-10
 
 CLM-1006 was left for a handler because its customer has no earlier claims. The history tool gave the model an empty reply, so it asked again, up to 37 times, until it ran out of model calls. It looped in three of the six runs, with both sets of instructions. Tools now always give the model text, with a sentence when nothing is found, and a check stops a tool returning a bare list (rule 13 in `docs/CODE_STANDARDS.md`). With the fix, CLM-1006 was worked three times live: one history call each time, approved at $425.00, as the handler did.
 
+## Retests after the fix
+
+With the fix in place, the claim agent alone worked chosen claims three times with each set of instructions, alternating, in a fresh temporary database each round.
+
+- Five claims picked at random with a fixed seed (CLM-1004, CLM-1005, CLM-1006, CLM-1009 and CLM-1016, all routine): 15/15 with each set, the same decision and payout every time. CLM-1006 asked for the history once each time and was approved at $425.00.
+- The ten hard and manual claims (CLM-1011, CLM-1014 and CLM-1018 to CLM-1025), chosen from the difficulty in `data/evals/` for checking only: 29/30 with the step-by-step instructions and 28/30 with the goals. The misses were CLM-1021 paid $954.00 (handler $825.00) with the step-by-step instructions, and CLM-1025 and CLM-1019 approved and paid $71.00 and $210.00 (handler referred both) with the goals. The goals read 10.8 sections a claim against 8.3.
+
+Over the six tries at the hard and manual claims, three here and three in the full runs, the step-by-step instructions got 57/60 and the goals 55/60. That gap is too small to separate them. Four of the goals' five misses approved and paid a claim the handler referred, against one of the step-by-step instructions' three, and the goals missed CLM-1025 twice in six, though its rule is in both. These are hints, not proof, and the instructions were not changed for them.
+
 ## Earlier live run, with the goal instructions
 
 On November 24, 2026, after the restructure and with instructions that give goals instead of steps, the same model worked all 25 claims in a temporary database: 15 approve, 4 decline and 6 refer. No claim failed, every payment was right for its decision, and three approvals over $1,000 were held. The run took 54 minutes, 44 of them while the computer was asleep. Each claim agent read between 6 and 16 sections, 11.4 on average, and 18 of the 25 searched.
